@@ -8,21 +8,21 @@ Projeto acadêmico desenvolvido na disciplina **Resolução de Problemas II**, d
 
 ## Sobre o projeto
 
-As enchentes urbanas afetam a Região Metropolitana de São Paulo (RMSP) e estão relacionadas a fatores como características do terreno, uso do solo e condições climáticas. Este projeto propõe investigar como a suscetibilidade espacial a enchentes e a importância dos fatores associados variam entre períodos de El Niño e períodos não associados ao fenômeno.
+As enchentes urbanas afetam criticamente a cidade de São Paulo e estão relacionadas a fatores como características do relevo, impermeabilização do solo, drenagem e variabilidade climática. Este projeto investiga como a suscetibilidade espacial a enchentes e a importância relativa dos fatores associados variam entre períodos de El Niño e períodos não associados ao fenômeno.
 
-Para isso, serão desenvolvidos e comparados modelos **Random Forest** e **XGBoost**, combinando registros históricos de inundação e variáveis geoespaciais. A interpretação dos modelos será realizada com **SHAP**, buscando compreender a contribuição das variáveis em cada cenário climático.
+Para isso, são desenvolvidos e comparados modelos **Random Forest** e **XGBoost**, combinando registros históricos de inundação (CGE) e variáveis geoespaciais (SRTM 30m, drenagem GeoSampa, índices climáticos ONI e meteorologia INMET). A interpretação dos modelos é realizada com técnicas de explicabilidade (XAI / SHAP), buscando compreender a contribuição das variáveis em cada cenário climático.
 
-O foco do estudo é o **mapeamento de áreas suscetíveis a enchentes** na RMSP.
+O foco atual do estudo é o **mapeamento de suscetibilidade a enchentes no Município de São Paulo (capital)**.
 
 ## Pergunta de pesquisa
 
-**Como os padrões espaciais de suscetibilidade a enchentes e a importância das variáveis preditoras diferem entre períodos de El Niño e períodos não associados ao fenômeno?**
+**Como os padrões espaciais de suscetibilidade a enchentes e a importância das variáveis preditoras diferem entre períodos de El Niño e períodos não associados ao fenômeno na cidade de São Paulo?**
 
 ## Objetivos
 
-- Construir uma base que integre registros históricos de enchentes e variáveis geoespaciais da RMSP.
+- Construir uma base consolidada que integre registros históricos de alagamentos (CGE), variáveis geoespaciais e meteorológicas do Município de São Paulo.
 - Separar os dados em cenários climáticos com e sem El Niño, utilizando o índice Oceanic Niño Index (ONI).
-- Desenvolver modelos Random Forest e XGBoost para cada cenário.
+- Desenvolver e comparar modelos Random Forest para cada cenário.
 - Comparar o desempenho dos modelos por meio de F1-score e AUC-ROC.
 - Analisar a contribuição das variáveis com SHAP.
 - Produzir e comparar mapas de suscetibilidade espacial a enchentes.
@@ -90,12 +90,12 @@ Consulte o [guia dos dados](dados/README.md) para preencher as pastas. Os arquiv
 - [x] Definição do tema e dos objetivos.
 - [x] Levantamento inicial de trabalhos relacionados.
 - [x] Elaboração da metodologia e do cronograma inicial.
-- [ ] Coleta e organização das bases de dados.
-- [ ] Construção do inventário de enchentes.
-- [ ] Separação dos dados por cenário climático.
-- [ ] Pré-processamento e seleção de atributos.
-- [ ] Treinamento, ajuste e avaliação dos modelos.
-- [ ] Análise de explicabilidade e geração dos mapas.
+- [x] Coleta e organização das bases de dados (CGE, GeoSampa, SRTM 30m, ONI, INMET).
+- [x] Construção do inventário de enchentes (1.165 alagamentos CGE + 1.165 pseudo-ausências).
+- [x] Separação dos dados por cenário climático (Índice ONI: El Niño vs Não-El Niño).
+- [x] Pré-processamento e integração de features geoespaciais e meteorológicas.
+- [x] Treinamento, ajuste e avaliação do primeiro modelo baseline Random Forest (97,8% acurácia, F1: 0,978).
+- [ ] Análise de explicabilidade detalhada (SHAP completo) e geração dos mapas raster contínuos de suscetibilidade.
 - [ ] Discussão dos resultados e elaboração do relatório final.
 
 ## Resultados esperados

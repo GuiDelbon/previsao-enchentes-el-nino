@@ -1,0 +1,63 @@
+{
+    "modelo_geral": {
+        "n_amostras_treino": 1864,
+        "n_amostras_teste": 466,
+        "cv_f1_medio": 0.9765,
+        "cv_auc_medio": 0.9932,
+        "teste_acuracia": 0.9785,
+        "teste_precisao": 1.0,
+        "teste_revocacao": 0.9571,
+        "teste_f1_score": 0.9781,
+        "teste_auc_roc": 0.991,
+        "matriz_confusao": [
+            [
+                233,
+                0
+            ],
+            [
+                10,
+                223
+            ]
+        ],
+        "importancia_variaveis": {
+            "altitude_m": 0.6456,
+            "distancia_rio_m": 0.1435,
+            "declividade_graus": 0.1157,
+            "precipitacao_dia_mm": 0.0398,
+            "precipitacao_max_hora_mm": 0.0285,
+            "umidade_relativa_media": 0.0118,
+            "temp_media_c": 0.0096,
+            "valor_oni": 0.0056
+        }
+    },
+    "cenario_el_nino": {
+        "n_amostras": 2184,
+        "teste_f1_score": 0.9594,
+        "teste_auc_roc": 0.989,
+        "importancia_variaveis": {
+            "altitude_m": 0.6292,
+            "declividade_graus": 0.1429,
+            "distancia_rio_m": 0.1358,
+            "precipitacao_dia_mm": 0.0357,
+            "precipitacao_max_hora_mm": 0.0259,
+            "umidade_relativa_media": 0.0139,
+            "temp_media_c": 0.0115,
+            "valor_oni": 0.0051
+        }
+    },
+    "cenario_nao_el_nino": {
+        "n_amostras": 146,
+        "teste_f1_score": 0.973,
+        "teste_auc_roc": 0.9971,
+        "importancia_variaveis": {
+            "altitude_m": 0.483,
+            "distancia_rio_m": 0.1815,
+            "declividade_graus": 0.1744,
+            "precipitacao_dia_mm": 0.0628,
+            "valor_oni": 0.0395,
+            "precipitacao_max_hora_mm": 0.0347,
+            "umidade_relativa_media": 0.0175,
+            "temp_media_c": 0.0067
+        }
+    }
+}

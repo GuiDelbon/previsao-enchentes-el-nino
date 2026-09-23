@@ -1,52 +1,80 @@
-# Dados do projeto
+# Dados do Projeto: Predição de Suscetibilidade a Enchentes em São Paulo
 
-Esta pasta reunirá as bases utilizadas nos experimentos e sua documentação. Nesta versão, há uma estrutura inicial; os arquivos de dados ainda precisam ser obtidos.
+Esta pasta reúne as bases de dados brutas e processadas utilizadas nos experimentos de suscetibilidade e previsão espacial de enchentes no **Município de São Paulo**, comparando períodos de **El Niño** e períodos não associados ao fenômeno.
 
-## Fontes
+---
 
-| Base | Instituição | Acesso | Situação |
-| --- | --- | --- | --- |
-| Oceanic Niño Index (ONI), ERSSTv6 | NOAA / Climate Prediction Center | [Série histórica](https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/oni/v6/) | Fonte selecionada; coleta pendente |
-| Dados históricos meteorológicos | INMET | [Arquivos anuais](https://portal.inmet.gov.br/dadoshistoricos) | Anos e estações a definir |
+## Estrutura de Diretórios
 
-## Como preencher as pastas
+```text
+dados/
+├── README.md                          # Este documento descritivo
+├── brutos/
+│   ├── cge/
+│   │   └── all_floods_cge_sp.csv      # Inventário histórico de alagamentos CGE (1.165 ocorrências)
+│   ├── geosampa/
+│   │   └── drenagem_sp.geojson        # Eixos e canais de drenagem da Prefeitura de SP
+│   ├── inmet/                         # Dados horários das estações A701 (Mirante) e A771 (Interlagos)
+│   ├── oni/
+│   │   └── oni_ersstv6.html           # Série histórica oficial do ONI (NOAA/CPC)
+│   └── srtm/
+│       └── S24W047.tif                # Modelo Digital de Elevação SRTM GL1 30m
+├── processados/
+│   ├── inmet_sp_diario.csv            # Série meteorológica diária consolidada para SP (2019-2026)
+│   ├── oni_mensal_classificado.csv    # Série mensal ONI com rotulação El Niño vs Não-El Niño
+│   └── dataset_suscetibilidade_sp.csv # Dataset final integrado para treinamento de ML (2.330 registros)
+└── metadados/
+    └── README.md                      # Fichas técnicas e dicionário de metadados das bases
+```
 
-### 1. ONI
+---
 
-Acesse a série histórica indicada acima e preserve uma cópia da tabela utilizada em `brutos/oni/`, registrando versão, URL e data de obtenção. Caso a tabela seja convertida para CSV, documente essa transformação e preserve também a cópia original.
+## Fontes e Bases de Dados
 
-Mantenha ano, trimestre e valor do índice. Ao associar o índice às observações meteorológicas, registre a convenção temporal adotada; por exemplo, DJF corresponde a dezembro-janeiro-fevereiro e pode ser associado ao mês central, janeiro. Essa convenção é uma decisão do projeto.
+| Base | Instituição / Origem | Recorte | Formato | Status |
+| :--- | :--- | :--- | :--- | :--- |
+| **Inventário de Alagamentos (Classe 1)** | CGE / Defesa Civil de São Paulo | Município de SP | CSV (`all_floods_cge_sp.csv`) | **Coletado e Integrado** |
+| **Topografia (SRTM GL1 30m)** | NASA / USGS / OpenTopography | Tile `S24W047` | GeoTIFF (`S24W047.tif`) | **Coletado e Integrado** |
+| **Rede de Drenagem** | GeoSampa (Prefeitura de SP) | Município de SP | GeoJSON (`drenagem_sp.geojson`) | **Coletado e Integrado** |
+| **Índice Climático ONI** | NOAA / CPC (ERSSTv6) | Global / Pacíﬁco Nino 3.4 | HTML / CSV | **Coletado e Integrado** |
+| **Meteorologia / Pluviometria** | INMET (A701 e A771) | São Paulo (Capital) | CSV | **Coletado e Integrado** |
 
-A página informa que o RONI passou a ser usado no monitoramento oficial do ENSO. Este projeto mantém o ONI previsto na proposta; qualquer troca de índice deverá ser documentada. [Fonte NOAA](https://www.cpc.ncep.noaa.gov/products/analysis_monitoring/enso/oni/v6/).
+> **Nota Metodológica sobre o INMET:** Os arquivos da estação `A302` presentes no histórico bruto correspondem ao Arquipélago de São Pedro e São Paulo (RN) e foram descartados no processamento. Apenas as estações `A701` (Mirante de Santana) e `A771` (Interlagos) foram utilizadas na consolidação.
 
-### 2. INMET
+---
 
-1. Defina o intervalo de anos da pesquisa.
-2. Acesse a página de dados históricos e baixe os arquivos anuais necessários.
-3. Selecione as estações pertinentes à Região Metropolitana de São Paulo, conferindo localização, período de operação e disponibilidade de registros.
-4. Guarde os arquivos originais selecionados em `brutos/inmet/`, preservando seus nomes e cabeçalhos. Uma subpasta por ano pode facilitar a organização.
-5. Registre os códigos e coordenadas das estações e o critério de seleção em `metadados/`.
+## Regras de Processamento e Engenharia de Atributos
 
-O portal apresenta os downloads por ano para estações automáticas. [Fonte INMET](https://portal.inmet.gov.br/dadoshistoricos).
+1. **Variável Alvo (`alvo_alagamento`)**:
+   * **Classe 1 (Alagamento)**: 1.165 registros de alagamento do CGE ocorridos na cidade de São Paulo, contendo coordenadas geográficas, data, hora e duração.
+   * **Classe 0 (Controle / Pseudo-Ausência)**: 1.165 pontos amostrados com filtros físicos restritivos: cota altimétrica $> 765$ m (acima da planície aluvial), declividade $> 2{,}5^\circ$, distância $> 200$ m de canais de drenagem e distância $> 300$ m de pontos históricos de alagamento.
+2. **Variáveis Topográficas**:
+   * **Altitude**: Extraída pontualmente da grade regular SRTM 30m.
+   * **Declividade (Slope)**: Calculada pelo algoritmo diferencial de Horn (janela $3 \times 3$) em graus e percentual.
+3. **Variável Hidrográfica**:
+   * **Distância ao rio (`distancia_rio_m`)**: Distância euclidiana mínima aos vértices da rede de drenagem municipal calculada via árvore espacial `cKDTree`.
+4. **Classificação Climática (ONI)**:
+   * Meses com anomalia $\ge +0{,}5$ °C classificados como `El Nino`.
+   * Meses com anomalia $< +0{,}5$ °C classificados como `Nao El Nino`.
+5. **Variáveis Pluviométricas**:
+   * Precipitação acumulada diária e intensidade horária máxima registradas no dia do evento pelas estações do INMET.
 
-### 3. Preparação
+---
 
-Salve as versões limpas em `processados/`. Documente unidades, fuso horário, tratamento de ausências e duplicatas, filtros e agregações. Não transforme registros ausentes de precipitação em chuva zero.
+## Como Reproduzir o Pipeline
 
-Antes de integrar as bases, defina a unidade de observação, como estação-dia ou estação-mês, e como ela se relacionará com o inventário de enchentes e as variáveis espaciais. Registre a regra de associação ao ONI e a regra de classificação climática.
+Execute os scripts em ordem a partir da raiz do repositório:
 
-## Registro de origem
+```bash
+# 1. Processar o índice ONI da NOAA
+python src/01_processar_oni.py
 
-Use o [modelo de metadados](metadados/README.md) para cada arquivo ou conjunto de arquivos. Mantenha os dados brutos separados dos processados e registre como reproduzir cada transformação.
+# 2. Consolidar as leituras diárias do INMET (Mirante e Interlagos)
+python src/02_processar_inmet.py
 
-Ao adicionar as bases ao GitHub, inclua os dados efetivamente usados no estudo. Para arquivos volumosos, mantenha nesta pasta a documentação, o endereço de obtenção e as instruções necessárias para reproduzir o recorte.
+# 3. Construir o dataset final de modelagem (unindo CGE, SRTM, GeoSampa e clima)
+python src/04_construir_dataset.py
 
-## Pendências
-
-- [ ] Definir os anos de análise.
-- [ ] Selecionar e documentar as estações do INMET.
-- [ ] Obter e registrar a versão da série ONI.
-- [ ] Adicionar os arquivos selecionados às pastas de dados brutos.
-- [ ] Definir a integração temporal e espacial das bases.
-- [ ] Obter o inventário de enchentes e as demais variáveis geoespaciais.
-- [ ] Documentar o processamento e os dados resultantes.
+# 4. Treinar os modelos Random Forest (Geral, El Niño e Não-El Niño)
+python src/05_treinar_random_forest.py
+```
